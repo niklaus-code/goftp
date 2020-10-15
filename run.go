@@ -10,14 +10,14 @@ import (
 	"flag"
 	"log"
 
-	filedriver "github.com/niklaus-code/goftp-hangzhou/file-driver"
-	"github.com/niklaus-code/goftp-hangzhou/server"
+	filedriver "github.com/niklaus-code/goftp-mongo/file-driver"
+	"github.com/niklaus-code/goftp-mongo/server"
 )
 
 func main() {
 	var (
 		root = flag.String("root", "/tmp", "Root directory to serve")
-		port = flag.Int("port", 2121, "Port")
+		port = flag.Int("port", 21, "Port")
 		host = flag.String("host", "0.0.0.0", "Host")
 	)
 	flag.Parse()

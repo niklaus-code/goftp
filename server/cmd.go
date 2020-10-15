@@ -652,6 +652,8 @@ func (cmd commandPass) RequireAuth() bool {
 	return false
 }
 
+var Privileges int
+
 func (cmd commandPass) Execute(conn *Conn, param string) {
 	// ok, err := conn.server.Auth.CheckPasswd(conn.reqUser, param)
 	// var auth Auth
@@ -667,13 +669,13 @@ func (cmd commandPass) Execute(conn *Conn, param string) {
 		conn.user = conn.reqUser
 		conn.pwd = param
 		conn.privileges = 1
-		conn.reqUser = ""
+		Privileges = 1
 		conn.writeMessage(230, "Password ok, continue")
 	case ok.Wpassword == param:
 		conn.user = conn.reqUser
 		conn.pwd = param
+		Privileges = 2
 		conn.privileges = 2
-		conn.reqUser = ""
 		conn.writeMessage(230, "Password ok, continue")
 	default:
 		conn.writeMessage(530, "Incorrect password, not logged in")
@@ -1164,8 +1166,8 @@ func (cmd commandStor) RequireAuth() bool {
 }
 
 func (cmd commandStor) Execute(conn *Conn, param string) {
-	fmt.Println(conn.privileges)
-	if conn.privileges != 2 {
+	if Privileges != 2 {
+	//if conn.privileges != 2 {
 		conn.writeMessage(550, fmt.Sprint("no privileges"))
 		return
 	}
