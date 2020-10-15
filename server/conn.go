@@ -46,7 +46,6 @@ type Conn struct {
 	appendData    bool
 	closed        bool
 	tls           bool
-	privileges    int
 	rootpath      string
 	pwd           string
 	filepathlist  []*FilePath

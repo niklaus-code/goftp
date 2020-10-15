@@ -258,7 +258,7 @@ func (cmd commandDele) RequireAuth() bool {
 }
 
 func (cmd commandDele) Execute(conn *Conn, param string) {
-	if conn.privileges != 2 {
+	if Privileges != 2 {
 		conn.writeMessage(550, "no privileges")
 		return
 	}
@@ -569,8 +569,8 @@ func (cmd commandMkd) RequireAuth() bool {
 }
 
 func (cmd commandMkd) Execute(conn *Conn, param string) {
-	if conn.privileges != 2 {
-		conn.writeMessage(550, fmt.Sprint("没有权限"))
+	if Privileges != 2 {
+		conn.writeMessage(550, fmt.Sprint("no privileges"))
 		return
 	}
 	path := conn.buildPath(param)
@@ -668,14 +668,12 @@ func (cmd commandPass) Execute(conn *Conn, param string) {
 	case ok.Rpassword == param:
 		conn.user = conn.reqUser
 		conn.pwd = param
-		conn.privileges = 1
 		Privileges = 1
 		conn.writeMessage(230, "Password ok, continue")
 	case ok.Wpassword == param:
 		conn.user = conn.reqUser
 		conn.pwd = param
 		Privileges = 2
-		conn.privileges = 2
 		conn.writeMessage(230, "Password ok, continue")
 	default:
 		conn.writeMessage(530, "Incorrect password, not logged in")
@@ -894,8 +892,8 @@ func (cmd commandRnto) RequireAuth() bool {
 }
 
 func (cmd commandRnto) Execute(conn *Conn, param string) {
-	if conn.privileges != 2 {
-		conn.writeMessage(550, fmt.Sprint("没有权限"))
+	if Privileges != 2 {
+		conn.writeMessage(550, fmt.Sprint("no privileges"))
 		return
 	}
 	path := conn.buildPath(param)
@@ -932,8 +930,8 @@ func (cmd commandRmd) RequireAuth() bool {
 }
 
 func (cmd commandRmd) Execute(conn *Conn, param string) {
-	if conn.privileges != 2 {
-		conn.writeMessage(550, fmt.Sprint("没有删除权限"))
+	if Privileges != 2 {
+		conn.writeMessage(550, fmt.Sprint("no privileges"))
 		return
 	}
 	path := conn.buildPath(param)
@@ -1167,7 +1165,6 @@ func (cmd commandStor) RequireAuth() bool {
 
 func (cmd commandStor) Execute(conn *Conn, param string) {
 	if Privileges != 2 {
-	//if conn.privileges != 2 {
 		conn.writeMessage(550, fmt.Sprint("no privileges"))
 		return
 	}
