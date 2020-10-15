@@ -20,7 +20,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/niklaus-code/goftp-hangzhou/config"
+	"github.com/niklaus-code/goftp-mongo/config"
 )
 
 const (

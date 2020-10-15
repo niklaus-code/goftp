@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/niklaus-code/goftp-hangzhou/server"
+	"github.com/niklaus-code/goftp-mongo/server"
 )
 
 type FileDriver struct {

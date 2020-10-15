@@ -10,7 +10,7 @@ import (
 
 	"context"
 
-	"github.com/niklaus-code/goftp-hangzhou/config"
+	"github.com/niklaus-code/goftp-mongo/config"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
