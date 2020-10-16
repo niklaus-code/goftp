@@ -15,8 +15,20 @@ import (
 )
 
 func Db_mongo() *mongo.Client {
+	cfg, err := ini.Load("conf/setting.ini")
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	var ip = cfg.Section("mongodb").Key("ip").String()
+	var port = cfg.Section("mongodb").Key("port").String()
+	var user = cfg.Section("mongodb").Key("user").String()
+	var passwd = cfg.Section("mongodb").Key("passwd").String()
+	var database = cfg.Section("mongodb").Key("database").String()
+
 	// Set client options
-	clientOptions := options.Client().ApplyURI("mongodb://user:bigdata@10.0.90.105:27018/bs_data")
+	mongodb_url := fmt.Sprintf("mongodb://%s:%s@%s:%s/%s", user, passwd, ip, port, database)
+	clientOptions := options.Client().ApplyURI(mongodb_url)
 
 	// Connect to MongoDB
 	client, err := mongo.Connect(context.TODO(), clientOptions)

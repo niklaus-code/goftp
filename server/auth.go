@@ -29,7 +29,7 @@ type Ftpuser struct {
 func CheckPasswd(dbsort string, name string, pass string) Ftpuser {
 	var ftpuser Ftpuser
 	switch {
-	case dbsort == "mongo":
+	case dbsort == "mongodb":
 		return check_mongo(name, pass)
 	case dbsort == "mysql":
 		return check_sql(name, pass)
