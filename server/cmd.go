@@ -229,8 +229,7 @@ func (cmd commandCwd) RequireAuth() bool {
 func (cmd commandCwd) Execute(conn *Conn, param string) {
 
 	path := conn.buildPath(param)
-	datapath := check(conn.user, conn.pwd)
-	currentpath := datapath.Datapath + path
+	currentpath := conn.rootpath + path
 	err := conn.driver.ChangeDir(currentpath)
 
 	if err == nil {
@@ -263,8 +262,7 @@ func (cmd commandDele) Execute(conn *Conn, param string) {
 		return
 	}
 	path := conn.buildPath(param)
-	datapath := check(conn.user, conn.pwd)
-	currentpath := datapath.Datapath + path
+	currentpath := conn.rootpath + path
 	err := conn.driver.DeleteFile(currentpath)
 	if err == nil {
 		conn.writeMessage(250, "File deleted")
@@ -437,8 +435,7 @@ func (cmd commandList) Execute(conn *Conn, param string) {
 	var files []FileInfo
 
 	path := conn.buildPath(parseListParam(param))
-	datapath := check(conn.user, conn.pwd)
-	currentpath := datapath.Datapath + path
+	currentpath := conn.rootpath + path
 	info, err := conn.driver.Stat(currentpath)
 
 	if err != nil {
@@ -574,8 +571,7 @@ func (cmd commandMkd) Execute(conn *Conn, param string) {
 		return
 	}
 	path := conn.buildPath(param)
-	datapath := check(conn.user, conn.pwd)
-	currentpath := datapath.Datapath + path
+	currentpath := conn.rootpath + path
 	err := conn.driver.MakeDir(currentpath)
 	//err := conn.driver.MakeDir(path)
 
@@ -656,24 +652,20 @@ var Privileges int
 
 func (cmd commandPass) Execute(conn *Conn, param string) {
 	// ok, err := conn.server.Auth.CheckPasswd(conn.reqUser, param)
-	// var auth Auth
-	ok, err := CheckPasswd(conn.reqUser, param)
-
-	if err != nil {
-		conn.writeMessage(550, "Checking password error")
-		return
-	}
+	ok := CheckPasswd("postgres", conn.reqUser, param)
 
 	switch {
 	case ok.Rpassword == param:
 		conn.user = conn.reqUser
 		conn.pwd = param
 		Privileges = 1
+		conn.rootpath = ok.Datapath
 		conn.writeMessage(230, "Password ok, continue")
 	case ok.Wpassword == param:
 		conn.user = conn.reqUser
 		conn.pwd = param
 		Privileges = 2
+		conn.rootpath = ok.Datapath
 		conn.writeMessage(230, "Password ok, continue")
 	default:
 		conn.writeMessage(530, "Incorrect password, not logged in")
@@ -811,8 +803,7 @@ func (cmd commandRetr) Execute(conn *Conn, param string) {
 		conn.lastFilePos = 0
 		conn.appendData = false
 	}()
-	datapath := check(conn.user, conn.pwd)
-	currentpath := datapath.Datapath + path
+	currentpath := conn.rootpath + path
 	bytes, data, err := conn.driver.GetFile(currentpath, conn.lastFilePos)
 	if err == nil {
 		defer data.Close()
@@ -897,10 +888,10 @@ func (cmd commandRnto) Execute(conn *Conn, param string) {
 		return
 	}
 	path := conn.buildPath(param)
-	datapath := check(conn.user, conn.pwd)
+	datapath := conn.rootpath
 
-	toPath := datapath.Datapath + path
-	frompath := datapath.Datapath + conn.renameFrom
+	toPath := datapath + path
+	frompath := datapath + conn.renameFrom
 	err := conn.driver.Rename(frompath, toPath)
 	defer func() {
 		conn.renameFrom = ""
@@ -935,8 +926,7 @@ func (cmd commandRmd) Execute(conn *Conn, param string) {
 		return
 	}
 	path := conn.buildPath(param)
-	datapath := check(conn.user, conn.pwd)
-	currentpath := datapath.Datapath + path
+	currentpath := conn.rootpath + path
 	err := conn.driver.DeleteDir(currentpath)
 	if err == nil {
 		conn.writeMessage(250, "Directory deleted")
@@ -1126,8 +1116,7 @@ func (cmd commandSize) RequireAuth() bool {
 func (cmd commandSize) Execute(conn *Conn, param string) {
 	if string(conn.pwd[0]) == "a" {
 		path := conn.buildPath(param)
-		datapath := query_datapath(conn.pwd, conn.user)
-		currentpath := datapath + path
+		currentpath := conn.rootpath + path
 		stat, err := conn.driver.Stat(currentpath)
 		if err != nil {
 			log.Printf("Size: error(%s)", err)
@@ -1175,8 +1164,7 @@ func (cmd commandStor) Execute(conn *Conn, param string) {
 	defer func() {
 		conn.appendData = false
 	}()
-	datapath := check(conn.user, conn.pwd)
-	currentpath := datapath.Datapath + targetPath
+	currentpath := conn.rootpath + targetPath
 	bytes, err := conn.driver.PutFile(currentpath, conn.dataConn, conn.appendData)
 	if err == nil {
 		msg := "OK, received " + strconv.Itoa(int(bytes)) + " bytes"

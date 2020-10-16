@@ -48,7 +48,6 @@ type Conn struct {
 	tls           bool
 	rootpath      string
 	pwd           string
-	filepathlist  []*FilePath
 }
 
 func (conn *Conn) LoginUser() string {

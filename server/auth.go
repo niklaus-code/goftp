@@ -6,7 +6,7 @@ package server
 
 import (
 	"crypto/subtle"
-	// "fmt"
+	"fmt"
 
 	"context"
 
@@ -26,7 +26,38 @@ type Ftpuser struct {
 	Datapath  string
 }
 
-func check(name string, pass string) Ftpuser {
+func CheckPasswd(dbsort string, name string, pass string) Ftpuser {
+	var ftpuser Ftpuser
+	switch {
+	case dbsort == "mongo":
+		return check_mongo(name, pass)
+	case dbsort == "mysql":
+		return check_sql(name, pass)
+	case dbsort == "postgres":
+		return check_sql(name, pass)
+	default:
+		return ftpuser
+	}
+
+}
+
+func check_sql(name string, pass string) Ftpuser {
+	c := config.Db()
+
+	var ftpuser Ftpuser
+	err := c.QueryRow("select username, rpassword, wpassword, datapath from goftp where username = $1", name).Scan(&ftpuser.Username, &ftpuser.Rpassword, &ftpuser.Wpassword, &ftpuser.Datapath)
+
+	if err != nil {
+		fmt.Println("--------------------")
+		fmt.Println(err)
+		return ftpuser
+	}
+
+	return ftpuser
+}
+
+//mongo auth
+func check_mongo(name string, pass string) Ftpuser {
 	mongoclient := config.Db_mongo()
 	collection := mongoclient.Database("bs_data").Collection("tb_user_ftp")
 
@@ -49,10 +80,10 @@ func check(name string, pass string) Ftpuser {
 
 // CheckPasswd will check user's password
 // func (a *SimpleAuth) CheckPasswd(name, pass string) (int, error) {
-func CheckPasswd(name, pass string) (Ftpuser, error) {
-	return check(name, pass), nil
-	// return constantTimeEquals(name, a.Name) && constantTimeEquals(pass, a.Password), nil
-}
+// func CheckPasswd(name, pass string) (Ftpuser, error) {
+// 	return check(name, pass), nil
+// 	// return constantTimeEquals(name, a.Name) && constantTimeEquals(pass, a.Password), nil
+// }
 
 func constantTimeEquals(a, b string) bool {
 	return len(a) == len(b) && subtle.ConstantTimeCompare([]byte(a), []byte(b)) == 1
