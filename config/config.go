@@ -14,12 +14,9 @@ import (
 	"log"
 )
 
-func Db_mongo() *mongo.Client {
-	cfg, err := ini.Load("conf/setting.ini")
-	if err != nil {
-		fmt.Println(err)
-	}
+var cfg, _ = ini.Load("conf/setting.ini")
 
+func Db_mongo() *mongo.Client {
 	var ip = cfg.Section("mongodb").Key("ip").String()
 	var port = cfg.Section("mongodb").Key("port").String()
 	var user = cfg.Section("mongodb").Key("user").String()
@@ -47,10 +44,6 @@ func Db_mongo() *mongo.Client {
 }
 
 func Db() *sql.DB {
-	cfg, err := ini.Load("conf/setting.ini")
-	if err != nil {
-		fmt.Println(err)
-	}
 	var ip = cfg.Section("postgres").Key("ip").String()
 	// var port = cfg.Section("postgres").Key("port").String()
 	var user = cfg.Section("postgres").Key("user").String()
