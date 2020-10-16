@@ -11,7 +11,7 @@ import (
 	"log"
 
 	filedriver "github.com/niklaus-code/goftp-mongo/file-driver"
-	"github.com/niklaus-code/goftp-mongo/server"
+	"github.com/niklaus-code/goftp/server"
 )
 
 func main() {

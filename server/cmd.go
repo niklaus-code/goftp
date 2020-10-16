@@ -11,7 +11,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/niklaus-code/goftp-mongo/config"
+	"github.com/niklaus-code/goftp/config"
 )
 
 type Command interface {
