@@ -60,11 +60,8 @@ func Db() *sql.DB {
 	var config = export("postgres")
 
 	conn := fmt.Sprintf("host=%s  user=%s  dbname=%s  sslmode=disable", config["ip"], config["user"], config["database"])
-	fmt.Println(conn)
-	fmt.Println("111111111111111")
 	db, err := sql.Open("postgres", conn)
 	if err != nil {
-		fmt.Println(err)
 		return nil
 	}
 	return db
@@ -73,7 +70,6 @@ func Db() *sql.DB {
 func Download_rate() int {
 	cfg, err := ini.Load("conf/setting.ini")
 	if err != nil {
-		fmt.Println(err)
 		return 0
 	}
 	rate, err := cfg.Section("download").Key("rate").Int()
