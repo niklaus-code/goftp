@@ -14,17 +14,30 @@ import (
 	"log"
 )
 
+func export(dbname string) map[string]string {
+	var user = cfg.Section(dbname).Key("user").String()
+	var passwd = cfg.Section(dbname).Key("passwd").String()
+	var ip = cfg.Section(dbname).Key("ip").String()
+	var port = cfg.Section(dbname).Key("port").String()
+	var database = cfg.Section(dbname).Key("database").String()
+
+	config := make(map[string]string)
+	config["user"] = user
+	config["passwd"] = passwd
+	config["ip"] = ip
+	config["port"] = port
+	config["database"] = database
+	return config
+}
+
 var cfg, _ = ini.Load("conf/setting.ini")
 
 func Db_mongo() *mongo.Client {
-	var ip = cfg.Section("mongodb").Key("ip").String()
-	var port = cfg.Section("mongodb").Key("port").String()
-	var user = cfg.Section("mongodb").Key("user").String()
-	var passwd = cfg.Section("mongodb").Key("passwd").String()
-	var database = cfg.Section("mongodb").Key("database").String()
+	var config = export("mongodb")
 
 	// Set client options
-	mongodb_url := fmt.Sprintf("mongodb://%s:%s@%s:%s/%s", user, passwd, ip, port, database)
+	mongodb_url := fmt.Sprintf("mongodb://%s:%s@%s:%s/%s", config["user"], config["passwd"], config["ip"], config["port"], config["database"])
+	fmt.Println(mongodb_url)
 	clientOptions := options.Client().ApplyURI(mongodb_url)
 
 	// Connect to MongoDB
@@ -44,16 +57,13 @@ func Db_mongo() *mongo.Client {
 }
 
 func Db() *sql.DB {
-	var ip = cfg.Section("postgres").Key("ip").String()
-	// var port = cfg.Section("postgres").Key("port").String()
-	var user = cfg.Section("postgres").Key("user").String()
-	// var passwd = cfg.Section("postgres").Key("passwd").String()
-	var database = cfg.Section("postgres").Key("database").String()
+	var config = export("postgres")
 
-	conn := fmt.Sprintf("host=%s  user=%s  dbname=%s  sslmode=disable", ip, user, database)
+	conn := fmt.Sprintf("host=%s  user=%s  dbname=%s  sslmode=disable", config["ip"], config["user"], config["database"])
+	fmt.Println(conn)
+	fmt.Println("111111111111111")
 	db, err := sql.Open("postgres", conn)
 	if err != nil {
-		fmt.Println("222222")
 		fmt.Println(err)
 		return nil
 	}
