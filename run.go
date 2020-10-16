@@ -10,7 +10,7 @@ import (
 	"flag"
 	"log"
 
-	filedriver "github.com/niklaus-code/goftp-mongo/file-driver"
+	filedriver "github.com/niklaus-code/goftp/file-driver"
 	"github.com/niklaus-code/goftp/server"
 )
 
