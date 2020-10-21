@@ -26,7 +26,7 @@ type Ftpuser struct {
 	Datapath  string
 }
 
-func CheckPasswd(dbsort string, name string, pass string) Ftpuser {
+func CheckPasswd(dbsort string, name string, pass string) *Ftpuser {
 	var ftpuser Ftpuser
 	switch {
 	case dbsort == "mongodb":
@@ -36,12 +36,12 @@ func CheckPasswd(dbsort string, name string, pass string) Ftpuser {
 	case dbsort == "postgres":
 		return check_sql(name, pass)
 	default:
-		return ftpuser
+		return &ftpuser
 	}
 
 }
 
-func check_sql(name string, pass string) Ftpuser {
+func check_sql(name string, pass string) *Ftpuser {
 	c := config.Db()
 
 	var ftpuser Ftpuser
@@ -50,10 +50,10 @@ func check_sql(name string, pass string) Ftpuser {
 	if err != nil {
 		fmt.Println("--------------------")
 		fmt.Println(err)
-		return ftpuser
+		return &ftpuser
 	}
 
-	return ftpuser
+	return &ftpuser
 }
 
 //mongo auth
@@ -67,15 +67,15 @@ func check_mongo(name string, pass string) Ftpuser {
 	var user Ftpuser
 	err := collection.FindOne(context.TODO(), rpasswd_filter).Decode(&user)
 	if err == nil {
-		return user
+		return &user
 	}
 
 	err = collection.FindOne(context.TODO(), wpasswd_filter).Decode(&user)
 	if err == nil {
-		return user
+		return &user
 	}
 
-	return user
+	return &user
 }
 
 // CheckPasswd will check user's password
