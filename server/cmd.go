@@ -427,7 +427,7 @@ func query_datapath(ftppwd string, ftpusr string) string {
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Println(datadir)
+	c.Close()
 	return datadir
 }
 

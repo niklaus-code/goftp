@@ -52,7 +52,7 @@ func check_sql(name string, pass string) *Ftpuser {
 		fmt.Println(err)
 		return &ftpuser
 	}
-
+	c.Close()
 	return &ftpuser
 }
 
