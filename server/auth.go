@@ -42,7 +42,7 @@ func CheckPasswd(dbsort string, name string, pass string) *Ftpuser {
 }
 
 func check_sql(name string, pass string) *Ftpuser {
-	c := config.Db()
+    c := config.Db()
     t := config.Ftpuser()
 
     title := fmt.Sprintf("select %s, %s, %s, %s from %s where %s = '%s'", t["user"], t["rpasswd"], t["wpasswd"], t["datapath"], t["table"], t["user"], name)
