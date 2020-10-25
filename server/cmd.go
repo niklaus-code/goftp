@@ -10,8 +10,6 @@ import (
 	"log"
 	"strconv"
 	"strings"
-
-	"github.com/niklaus-code/goftp/config"
 )
 
 type Command interface {
@@ -420,17 +418,6 @@ type FilePath struct {
 	Datapath string `json:"filepath"`
 }
 
-func query_datapath(ftppwd string, ftpusr string) string {
-	c := config.Db()
-	var datadir string
-	err := c.QueryRow("select datadir as datadir from products where ftppwd = $1 and ftpusr = $2 ", ftppwd, ftpusr).Scan(&datadir)
-	if err != nil {
-		fmt.Println(err)
-	}
-	c.Close()
-	return datadir
-}
-
 func (cmd commandList) Execute(conn *Conn, param string) {
 	var files []FileInfo
 
@@ -554,7 +541,7 @@ func (cmd commandMdtm) Execute(conn *Conn, param string) {
 type commandMkd struct{}
 
 func (cmd commandMkd) IsExtend() bool {
-	return false // datapath := query_datapath(conn.pwd, conn.user)
+	return false
 }
 
 func (cmd commandMkd) RequireParam() bool {
@@ -877,7 +864,6 @@ func (cmd commandRnto) RequireParam() bool {
 	return true
 }
 
-// datapath := query_datapath(conn.pwd, conn.user)
 func (cmd commandRnto) RequireAuth() bool {
 	return true
 }
@@ -1114,25 +1100,14 @@ func (cmd commandSize) RequireAuth() bool {
 }
 
 func (cmd commandSize) Execute(conn *Conn, param string) {
-	if string(conn.pwd[0]) == "a" {
-		path := conn.buildPath(param)
-		currentpath := conn.rootpath + path
-		stat, err := conn.driver.Stat(currentpath)
-		if err != nil {
-			log.Printf("Size: error(%s)", err)
-			conn.writeMessage(450, fmt.Sprint("path", path, "not found"))
-		} else {
-			conn.writeMessage(213, strconv.Itoa(int(stat.Size())))
-		}
+	path := conn.buildPath(param)
+	currentpath := conn.rootpath + path
+	stat, err := conn.driver.Stat(currentpath)
+	if err != nil {
+		log.Printf("Size: error(%s)", err)
+		conn.writeMessage(450, fmt.Sprint("path", path, "not found"))
 	} else {
-		path := "/o	// datapath := query_datapath(conn.pwd, conn.user)pt"
-		stat, err := conn.driver.Stat("/opt")
-		if err != nil {
-			log.Printf("Size: error(%s)", err)
-			conn.writeMessage(450, fmt.Sprint("path", path, "not found"))
-		} else {
-			conn.writeMessage(213, strconv.Itoa(int(stat.Size())))
-		}
+		conn.writeMessage(213, strconv.Itoa(int(stat.Size())))
 	}
 }
 
