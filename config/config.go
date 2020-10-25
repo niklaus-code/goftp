@@ -14,6 +14,22 @@ import (
 	"log"
 )
 
+func Ftpuser() map[string]string {
+	var table = cfg.Section("ftpuser").Key("table").String()
+	var user = cfg.Section("ftpuser").Key("user").String()
+	var rpasswd = cfg.Section("ftpuser").Key("rpasswd").String()
+	var wpasswd = cfg.Section("ftpuser").Key("wpasswd").String()
+	var datadir = cfg.Section("ftpuser").Key("datapath").String()
+
+	config := make(map[string]string)
+	config["table"] = table
+	config["datapath"] = datadir
+	config["user"] = user
+	config["rpasswd"] = rpasswd
+	config["wpasswd"] = wpasswd
+	return config
+}
+
 func export(dbname string) map[string]string {
 	var user = cfg.Section(dbname).Key("user").String()
 	var passwd = cfg.Section(dbname).Key("passwd").String()
