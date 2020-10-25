@@ -61,16 +61,10 @@ func check_mongo(name string, pass string) *Ftpuser {
 	mongoclient := config.Db_mongo()
 	collection := mongoclient.Database("bs_data").Collection("tb_user_ftp")
 
-	rpasswd_filter := bson.D{{"username", name}, {"rpassword", pass}}
-	wpasswd_filter := bson.D{{"username", name}, {"wpassword", pass}}
+	filter := bson.D{{"username", name}}
 
 	var user Ftpuser
-	err := collection.FindOne(context.TODO(), rpasswd_filter).Decode(&user)
-	if err == nil {
-		return &user
-	}
-
-	err = collection.FindOne(context.TODO(), wpasswd_filter).Decode(&user)
+	err := collection.FindOne(context.TODO(), filter).Decode(&user)
 	if err == nil {
 		return &user
 	}
