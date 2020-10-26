@@ -639,7 +639,7 @@ var Privileges int
 
 func (cmd commandPass) Execute(conn *Conn, param string) {
 	// ok, err := conn.server.Auth.CheckPasswd(conn.reqUser, param)
-	ok := CheckPasswd("postgres", conn.reqUser, param)
+	ok := CheckPasswd(conn.reqUser, param)
 
 	switch {
 	case ok.Rpassword == param:

@@ -26,7 +26,8 @@ type Ftpuser struct {
 	Datapath  string
 }
 
-func CheckPasswd(dbsort string, name string, pass string) *Ftpuser {
+func CheckPasswd(name string, pass string) *Ftpuser {
+    var dbsort = config.Dbname
 	var ftpuser Ftpuser
 	switch {
 	case dbsort == "mongodb":

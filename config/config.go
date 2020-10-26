@@ -14,6 +14,8 @@ import (
 	"log"
 )
 
+var Dbname = cfg.Section("db").Key("dbname").String()
+
 func Ftpuser() map[string]string {
 	var table = cfg.Section("ftpuser").Key("table").String()
 	var user = cfg.Section("ftpuser").Key("user").String()
