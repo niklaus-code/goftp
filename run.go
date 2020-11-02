@@ -10,9 +10,22 @@ import (
 	"flag"
 	"log"
 
+    "os"
 	filedriver "github.com/niklaus-code/goftp/file-driver"
 	"github.com/niklaus-code/goftp/server"
 )
+
+func init() {
+        file := "./" +"message"+ ".txt"
+        logFile, err := os.OpenFile(file, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0766)
+        if err != nil {
+                panic(err)
+        }
+        log.SetOutput(logFile) // 将文件设置为log输出的文件
+        log.SetPrefix("[qSkipTool]")
+        log.SetFlags(log.LstdFlags | log.Lshortfile | log.LUTC)
+        return
+}
 
 func main() {
 	var (
