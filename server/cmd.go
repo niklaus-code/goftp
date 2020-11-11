@@ -642,13 +642,13 @@ func (cmd commandPass) Execute(conn *Conn, param string) {
 	ok := CheckPasswd(conn.reqUser, param)
 
 	switch {
-	case ok.Rpassword == param:
+	case ok.Rpassword.String == param:
 		conn.user = conn.reqUser
 		conn.pwd = param
 		Privileges = 1
 		conn.rootpath = ok.Datapath
 		conn.writeMessage(230, "Password ok, continue")
-	case ok.Wpassword == param:
+	case ok.Wpassword.String == param:
 		conn.user = conn.reqUser
 		conn.pwd = param
 		Privileges = 2

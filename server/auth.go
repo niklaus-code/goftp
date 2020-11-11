@@ -7,6 +7,7 @@ package server
 import (
 	"crypto/subtle"
 	"fmt"
+    "database/sql"
 
 	"context"
 
@@ -21,8 +22,8 @@ type Auth interface {
 
 type Ftpuser struct {
 	Username  string
-	Rpassword string
-	Wpassword string
+	Rpassword sql.NullString
+	Wpassword sql.NullString
 	Datapath  string
 }
 
@@ -51,6 +52,7 @@ func check_sql(name string, pass string) *Ftpuser {
 	err := c.QueryRow(title).Scan(&ftpuser.Username, &ftpuser.Rpassword, &ftpuser.Wpassword, &ftpuser.Datapath)
 
 	if err != nil {
+        fmt.Println(err)
 		return &ftpuser
 	}
 	c.Close()
