@@ -50,10 +50,10 @@ func check_sql(name string, pass string) *Ftpuser {
 	var ftpuser Ftpuser
 	err := c.QueryRow(title).Scan(&ftpuser.Username, &ftpuser.Rpassword, &ftpuser.Wpassword, &ftpuser.Datapath)
 
+	c.Close()
 	if err != nil {
 		return &ftpuser
 	}
-	c.Close()
 	return &ftpuser
 }
 
