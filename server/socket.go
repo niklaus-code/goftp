@@ -5,6 +5,7 @@
 package server
 
 import (
+	"fmt"
 	"crypto/tls"
 	"io"
 	"net"
@@ -202,11 +203,17 @@ func (socket *ftpPassiveSocket) Close() error {
 	return nil
 }
 
+var socketportlist = []int {50991, 50992, 50993}
+
 func (socket *ftpPassiveSocket) GoListenAndServe(sessionID string) (err error) {
-	laddr, err := net.ResolveTCPAddr("tcp", net.JoinHostPort("", strconv.Itoa(socket.port)))
-	if err != nil {
-		socket.logger.Print(sessionID, err)
-		return
+	var laddr *net.TCPAddr
+	for _, v := range socketportlist {
+		laddr, err = net.ResolveTCPAddr("tcp", net.JoinHostPort("", strconv.Itoa(v)))
+		if err != nil {
+			fmt.Println(nil)
+			}
+		socketportlist = socketportlist[1:]
+		break
 	}
 
 	var tcplistener *net.TCPListener
@@ -251,6 +258,7 @@ func (socket *ftpPassiveSocket) GoListenAndServe(sessionID string) (err error) {
 		socket.err = nil
 		socket.conn = conn
 		_ = listener.Close()
+		socketportlist = append(socketportlist, socket.port)
 	}()
 	return nil
 }
