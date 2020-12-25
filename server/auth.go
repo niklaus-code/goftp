@@ -48,15 +48,14 @@ func check_sql(name string, pass string) *Ftpuser {
     t := config.Ftpuser()
 
     title := fmt.Sprintf("select %s, %s, %s, %s from %s where %s = '%s'", t["user"], t["rpasswd"], t["wpasswd"], t["datapath"], t["table"], t["user"], name)
-	var ftpuser Ftpuser
-	err := c.QueryRow(title).Scan(&ftpuser.Username, &ftpuser.Rpassword, &ftpuser.Wpassword, &ftpuser.Datapath)
+    var ftpuser Ftpuser
+    err := c.QueryRow(title).Scan(&ftpuser.Username, &ftpuser.Rpassword, &ftpuser.Wpassword, &ftpuser.Datapath)
 
-	c.Close()
-	if err != nil {
-        fmt.Println(err)
-		return &ftpuser
-	}
+    c.Close()
+    if err != nil {
 	return &ftpuser
+    }
+    return &ftpuser
 }
 
 //mongo auth
