@@ -14,6 +14,10 @@ import (
 	"log"
 )
 
+var cfg, _ = ini.Load("conf/setting.ini")
+
+var StartPort = cfg.Section("pasvport").Key("startport").String()
+var RangePort = cfg.Section("pasvport").Key("rangeport").String()
 var Dbname = cfg.Section("db").Key("dbname").String()
 
 func Ftpuser() map[string]string {
@@ -48,7 +52,6 @@ func export(dbname string) map[string]string {
 	return config
 }
 
-var cfg, _ = ini.Load("conf/setting.ini")
 
 func Db_mongo() *mongo.Client {
 	var config = export("mongodb")
