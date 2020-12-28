@@ -113,7 +113,8 @@ func (cmd commandAppe) Execute(conn *Conn, param string) {
 	targetPath := conn.buildPath(param)
 	conn.writeMessage(150, "Data transfer starting")
 
-	currentpath := conn.rootpath + "/" + conn.user + targetPath
+	//currentpath := conn.rootpath + "/" + conn.user + targetPath
+	currentpath := conn.rootpath + "/" + targetPath
 	bytes, err := conn.driver.PutFile(currentpath, conn.dataConn, true)
 	if err == nil {
 		msg := "OK, received " + strconv.Itoa(int(bytes)) + " bytes"
