@@ -48,6 +48,7 @@ type Conn struct {
 	tls           bool
 	rootpath      string
 	pwd           string
+	remoteaddr    net.Addr
 }
 
 func (conn *Conn) LoginUser() string {

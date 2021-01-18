@@ -530,6 +530,7 @@ func (cmd commandMdtm) RequireAuth() bool {
 func (cmd commandMdtm) Execute(conn *Conn, param string) {
 	path := conn.buildPath(param)
 	stat, err := conn.driver.Stat(path)
+
 	if err == nil {
 		conn.writeMessage(213, stat.ModTime().Format("20060102150405"))
 	} else {
@@ -642,9 +643,11 @@ func (cmd commandPass) Execute(conn *Conn, param string) {
 	// ok, err := conn.server.Auth.CheckPasswd(conn.reqUser, param)
 	ok := CheckPasswd(conn.reqUser, param)
 	
-	if len(ok.Datapath) < 15 {
+	if len(ok.Datapath) < 5 {
 		conn.writeMessage(530, "filepath err, Please Contact The Server Administrator")
 		}
+	//log.Print(user)
+	log.SetPrefix(conn.reqUser + " " + conn.remoteaddr.String() + " ")
 
 	switch {
 	case ok.Rpassword.String == param:
