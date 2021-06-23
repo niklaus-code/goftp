@@ -20,7 +20,7 @@ var cfg, _ = ini.Load("conf/setting.ini")
 
 var StartPort = cfg.Section("pasvport").Key("startport").String()
 var RangePort = cfg.Section("pasvport").Key("rangeport").String()
-var Dbname = cfg.Section("db").Key("dbname").String()
+var Dbsort = cfg.Section("db").Key("dbsort").String()
 
 func Ftpuser() map[string]string {
 	var table = cfg.Section("ftpuser").Key("table").String()
@@ -38,12 +38,12 @@ func Ftpuser() map[string]string {
 	return config
 }
 
-func export(dbname string) map[string]string {
-	var user = cfg.Section(dbname).Key("user").String()
-	var passwd = cfg.Section(dbname).Key("passwd").String()
-	var ip = cfg.Section(dbname).Key("ip").String()
-	var port = cfg.Section(dbname).Key("port").String()
-	var database = cfg.Section(dbname).Key("database").String()
+func export(Dbsort string) map[string]string {
+	var user = cfg.Section(Dbsort).Key("user").String()
+	var passwd = cfg.Section(Dbsort).Key("passwd").String()
+	var ip = cfg.Section(Dbsort).Key("ip").String()
+	var port = cfg.Section(Dbsort).Key("port").String()
+	var database = cfg.Section(Dbsort).Key("database").String()
 
 	config := make(map[string]string)
 	config["user"] = user
@@ -80,10 +80,10 @@ func Db_mongo() *mongo.Client {
 }
 
 func Db() *sql.DB {
-	var config = export("mysql")
+	var config = export(Dbsort)
 
 	conn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", config["user"], config["passwd"], config["ip"], config["port"], config["database"])
-	db, err := sql.Open("mysql", conn)
+	db, err := sql.Open(Dbsort, conn)
 	if err != nil {
 		return nil
 	}
