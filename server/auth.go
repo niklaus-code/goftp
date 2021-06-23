@@ -9,6 +9,7 @@ import (
 	"fmt"
     "database/sql"
 
+	"errors"
 	"context"
 
 	"github.com/niklaus-code/goftp/config"
@@ -21,45 +22,41 @@ type Auth interface {
 }
 
 type Ftpuser struct {
-	Username  string
-	Rpassword sql.NullString
-	Wpassword sql.NullString
+	Id  string
+	Rpasswd sql.NullString
+	Wpasswd sql.NullString
 	Datapath  string
 }
 
-func CheckPasswd(name string, pass string) *Ftpuser {
+func CheckPasswd(name string, pass string) (*Ftpuser, error) {
     var dbsort = config.Dbname
-	var ftpuser Ftpuser
+
 	switch {
 	case dbsort == "mongodb":
 		return check_mongo(name, pass)
-	case dbsort == "mysql":
-		return check_sql(name, pass)
-	case dbsort == "postgres":
-		return check_sql(name, pass)
 	default:
-		return &ftpuser
+		return check_sql(name, pass)
 	}
 
 }
 
-func check_sql(name string, pass string) *Ftpuser {
+func check_sql(name string, pass string) (*Ftpuser, error) {
     c := config.Db()
     t := config.Ftpuser()
 
     title := fmt.Sprintf("select %s, %s, %s, %s from %s where %s = '%s'", t["user"], t["rpasswd"], t["wpasswd"], t["datapath"], t["table"], t["user"], name)
     var ftpuser Ftpuser
-    err := c.QueryRow(title).Scan(&ftpuser.Username, &ftpuser.Rpassword, &ftpuser.Wpassword, &ftpuser.Datapath)
+    err := c.QueryRow(title).Scan(&ftpuser.Id, &ftpuser.Rpasswd, &ftpuser.Wpasswd, &ftpuser.Datapath)
 
     c.Close()
     if err != nil {
-	return &ftpuser
+		return nil, errors.New("auth faild")
     }
-    return &ftpuser
+    return &ftpuser, nil
 }
 
 //mongo auth
-func check_mongo(name string, pass string) *Ftpuser {
+func check_mongo(name string, pass string) (*Ftpuser, error) {
 	mongoclient := config.Db_mongo()
 	collection := mongoclient.Database("bs_data").Collection("tb_user_ftp")
 
@@ -68,10 +65,10 @@ func check_mongo(name string, pass string) *Ftpuser {
 	var user Ftpuser
 	err := collection.FindOne(context.TODO(), filter).Decode(&user)
 	if err == nil {
-		return &user
+		return &user, nil
 	}
 
-	return &user
+	return &user, nil
 }
 
 // CheckPasswd will check user's password
