@@ -6,6 +6,8 @@ import (
 
 	"github.com/go-ini/ini"
 	_ "github.com/lib/pq"
+	//_ "github.com/jinzhu/gorm/dialects/mysql"
+	_ "github.com/go-sql-driver/mysql"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -78,10 +80,10 @@ func Db_mongo() *mongo.Client {
 }
 
 func Db() *sql.DB {
-	var config = export("postgres")
+	var config = export("mysql")
 
-	conn := fmt.Sprintf("host=%s  user=%s  dbname=%s  sslmode=disable", config["ip"], config["user"], config["database"])
-	db, err := sql.Open("postgres", conn)
+	conn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", config["user"], config["passwd"], config["ip"], config["port"], config["database"])
+	db, err := sql.Open("mysql", conn)
 	if err != nil {
 		return nil
 	}
