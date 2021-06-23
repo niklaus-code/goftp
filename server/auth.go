@@ -6,10 +6,9 @@ package server
 
 import (
 	"crypto/subtle"
+	"database/sql"
 	"fmt"
-    "database/sql"
 
-	"errors"
 	"context"
 
 	"github.com/niklaus-code/goftp/config"
@@ -29,7 +28,7 @@ type Ftpuser struct {
 }
 
 func CheckPasswd(name string, pass string) (*Ftpuser, error) {
-    var dbsort = config.Dbname
+    var dbsort = config.Dbsort
 
 	switch {
 	case dbsort == "mongodb":
@@ -50,7 +49,7 @@ func check_sql(name string, pass string) (*Ftpuser, error) {
 
     c.Close()
     if err != nil {
-		return nil, errors.New("auth faild")
+		return nil, err
     }
     return &ftpuser, nil
 }
@@ -64,8 +63,8 @@ func check_mongo(name string, pass string) (*Ftpuser, error) {
 
 	var user Ftpuser
 	err := collection.FindOne(context.TODO(), filter).Decode(&user)
-	if err == nil {
-		return &user, nil
+	if err != nil {
+		return nil, err
 	}
 
 	return &user, nil
