@@ -644,6 +644,7 @@ func (cmd commandPass) Execute(conn *Conn, param string) {
 	ok, err := CheckPasswd(conn.reqUser, param)
 	if err != nil {
 		conn.writeMessage(200, "auth faild")
+		return
 	}
 
 	if len(ok.Datapath) < 5 {
