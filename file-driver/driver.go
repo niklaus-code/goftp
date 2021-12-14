@@ -88,7 +88,7 @@ func (driver *FileDriver) Stat(path string) (server.FileInfo, error) {
 	return &FileInfo{f, mode, owner, group}, nil
 }
 
-//虚拟目录path替换为数据里面文件 明天实现
+//虚拟目录path替换为数据里面文件
 func (driver *FileDriver) ListDirs(path string, callback func(server.FileInfo) error) error {
 	return filepath.Walk(path, func(f string, info os.FileInfo, err error) error {
 		if err != nil {

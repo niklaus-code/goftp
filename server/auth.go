@@ -5,12 +5,9 @@
 package server
 
 import (
+	"context"
 	"crypto/subtle"
 	"database/sql"
-	"fmt"
-
-	"context"
-
 	"github.com/niklaus-code/goftp/config"
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -27,42 +24,44 @@ type Ftpuser struct {
 	Datapath  string
 }
 
-func CheckPasswd(name string, pass string) (*Ftpuser, error) {
+func CheckPasswd(name string) (*Ftpuser, error) {
     var dbsort = config.Dbsort
 
 	switch {
 	case dbsort == "mongodb":
-		return check_mongo(name, pass)
+		return check_mongo(name)
 	default:
-		return check_sql(name, pass)
+		return check_sql(name)
 	}
 
 }
 
-func check_sql(name string, pass string) (*Ftpuser, error) {
-    c := config.Db()
-    t := config.Ftpuser()
-
-    title := fmt.Sprintf("select %s, %s, %s, %s from %s where %s = '%s'", t["user"], t["rpasswd"], t["wpasswd"], t["datapath"], t["table"], t["user"], name)
-    var ftpuser Ftpuser
-    err := c.QueryRow(title).Scan(&ftpuser.Id, &ftpuser.Rpasswd, &ftpuser.Wpasswd, &ftpuser.Datapath)
-
-    c.Close()
+func check_sql(name string) (*Ftpuser, error) {
+    dbs, err := config.Db()
     if err != nil {
-		return nil, err
+    	return nil, err
+	}
+
+    var ftpuser Ftpuser
+    errdb := dbs.Where("id=?", name).First(&ftpuser)
+    if errdb.Error != nil {
+		return nil, errdb.Error
     }
     return &ftpuser, nil
 }
 
 //mongo auth
-func check_mongo(name string, pass string) (*Ftpuser, error) {
-	mongoclient := config.Db_mongo()
+func check_mongo(name string) (*Ftpuser, error) {
+	mongoclient, err := config.Db_mongo()
+	if err != nil {
+		return nil, err
+	}
 	collection := mongoclient.Database("bs_data").Collection("tb_user_ftp")
 
 	filter := bson.D{{"username", name}}
 
 	var user Ftpuser
-	err := collection.FindOne(context.TODO(), filter).Decode(&user)
+	err = collection.FindOne(context.TODO(), filter).Decode(&user)
 	if err != nil {
 		return nil, err
 	}

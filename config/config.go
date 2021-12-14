@@ -1,7 +1,6 @@
 package config
 
 import (
-	"database/sql"
 	"fmt"
 
 	"github.com/go-ini/ini"
@@ -13,7 +12,9 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"context"
-	"log"
+	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/mysql"
+	"time"
 )
 
 var cfg, _ = ini.Load("conf/setting.ini")
@@ -55,39 +56,42 @@ func export(Dbsort string) map[string]string {
 }
 
 
-func Db_mongo() *mongo.Client {
+func Db_mongo() (*mongo.Client, error) {
 	var config = export("mongodb")
 
 	// Set client options
 	mongodb_url := fmt.Sprintf("mongodb://%s:%s@%s:%s/%s", config["user"], config["passwd"], config["ip"], config["port"], config["database"])
-	fmt.Println(mongodb_url)
 	clientOptions := options.Client().ApplyURI(mongodb_url)
 
 	// Connect to MongoDB
 	client, err := mongo.Connect(context.TODO(), clientOptions)
 
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	// Check the connection
 	err = client.Ping(context.TODO(), nil)
 
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
-	return client
+	return client, nil
 }
 
-func Db() *sql.DB {
-	var config = export(Dbsort)
-
-	conn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", config["user"], config["passwd"], config["ip"], config["port"], config["database"])
-	db, err := sql.Open(Dbsort, conn)
-	if err != nil {
-		return nil
+func Db() (*gorm.DB,error) {
+	db, errDb:=gorm.Open("mysql","nicloud:nicloud@(127.0.0.1:3306)/ftp?parseTime=true")
+	if errDb != nil {
+		fmt.Println(errDb.Error())
+		return nil, errDb
 	}
-	return db
+
+	sqlDB := db.DB()
+	sqlDB.SetMaxIdleConns(100) //空闲连接数
+	sqlDB.SetMaxOpenConns(1000)//最大连接数
+	sqlDB.SetConnMaxLifetime(time.Second * 360)
+
+	return db, nil
 }
 
 func Download_rate() int {

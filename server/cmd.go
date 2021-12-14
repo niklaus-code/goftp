@@ -641,16 +641,11 @@ var Privileges int
 
 func (cmd commandPass) Execute(conn *Conn, param string) {
 	// ok, err := conn.server.Auth.CheckPasswd(conn.reqUser, param)
-	ok, err := CheckPasswd(conn.reqUser, param)
+	ok, err := CheckPasswd(conn.reqUser)
 	if err != nil {
 		conn.writeMessage(200, "auth faild")
 		return
 	}
-
-	if len(ok.Datapath) < 5 {
-		conn.writeMessage(530, "filepath err, Please Contact The Server Administrator")
-		}
-	//log.SetPrefix(conn.reqUser + " " + conn.remoteaddr.String() + " ")
 
 	switch {
 	case ok.Rpasswd.String == param:
