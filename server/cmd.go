@@ -427,6 +427,7 @@ func (cmd commandList) Execute(conn *Conn, param string) {
 	info, err := conn.driver.Stat(currentpath)
 
 	if err != nil {
+		fmt.Println(err)
 		conn.writeMessage(550, err.Error())
 		return
 	}
@@ -641,24 +642,21 @@ var Privileges int
 
 func (cmd commandPass) Execute(conn *Conn, param string) {
 	// ok, err := conn.server.Auth.CheckPasswd(conn.reqUser, param)
-	ok, err := CheckPasswd(conn.reqUser)
+	u, privilileges, err := CheckPasswd(conn.reqUser, param)
 	if err != nil {
 		conn.writeMessage(200, "auth faild")
 		return
 	}
+	conn.pwd = param
+	conn.user = conn.reqUser
+	conn.rootpath = u.Datapath
 
 	switch {
-	case ok.Rpasswd.String == param:
-		conn.user = conn.reqUser
-		conn.pwd = param
+	case privilileges == 0:
 		Privileges = 1
-		conn.rootpath = ok.Datapath
-		conn.writeMessage(230, "Password ok, continue")
-	case ok.Wpasswd.String == param:
-		conn.user = conn.reqUser
-		conn.pwd = param
+		conn.writeMessage(230, "Password ok, read-only access")
+	case privilileges == 1:
 		Privileges = 2
-		conn.rootpath = ok.Datapath
 		conn.writeMessage(230, "Password ok, continue")
 	default:
 		conn.writeMessage(530, "Incorrect password, not logged in")

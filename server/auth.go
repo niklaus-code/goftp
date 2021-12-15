@@ -6,8 +6,7 @@ package server
 
 import (
 	"context"
-	"crypto/subtle"
-	"database/sql"
+	"errors"
 	"github.com/niklaus-code/goftp/config"
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -17,65 +16,68 @@ type Auth interface {
 	CheckPasswd(string, string) (int, error)
 }
 
-type Ftpuser struct {
+type User_datasets struct {
 	Id  string
-	Rpasswd sql.NullString
-	Wpasswd sql.NullString
+	Rpassword string
+	Wpassword string
 	Datapath  string
 }
 
-func CheckPasswd(name string) (*Ftpuser, error) {
+func CheckPasswd(name string, pwd string) (*User_datasets, int, error) {
     var dbsort = config.Dbsort
 
 	switch {
 	case dbsort == "mongodb":
-		return check_mongo(name)
+		return check_mongo(name, pwd)
 	default:
-		return check_sql(name)
+		return check_sql(name, pwd)
 	}
 
 }
 
-func check_sql(name string) (*Ftpuser, error) {
+func check_sql(user string, pwd string) (*User_datasets, int, error) {
     dbs, err := config.Db()
     if err != nil {
-    	return nil, err
+    	return nil, 0, err
 	}
 
-    var ftpuser Ftpuser
-    errdb := dbs.Where("id=?", name).First(&ftpuser)
+    var ftpuser User_datasets
+    errdb := dbs.Where("id=?", user).First(&ftpuser)
     if errdb.Error != nil {
-		return nil, errdb.Error
+		return nil, 0, errdb.Error
     }
-    return &ftpuser, nil
+    if ftpuser.Rpassword == pwd {
+    	return &ftpuser, 0, nil
+	}
+	if ftpuser.Wpassword == pwd {
+		return &ftpuser, 1, nil
+	}
+
+	return nil, 0, errors.New("认证失败")
 }
 
 //mongo auth
-func check_mongo(name string) (*Ftpuser, error) {
+func check_mongo(user string, pwd string) (*User_datasets, int, error) {
 	mongoclient, err := config.Db_mongo()
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	collection := mongoclient.Database("bs_data").Collection("tb_user_ftp")
 
-	filter := bson.D{{"username", name}}
+	filter := bson.D{{"username", user}}
 
-	var user Ftpuser
+	var u User_datasets
 	err = collection.FindOne(context.TODO(), filter).Decode(&user)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
-	return &user, nil
-}
+	if u.Rpassword == pwd {
+		return &u, 0, nil
+	}
+	if u.Wpassword == pwd {
+		return &u, 1, nil
+	}
 
-// CheckPasswd will check user's password
-// func (a *SimpleAuth) CheckPasswd(name, pass string) (int, error) {
-// func CheckPasswd(name, pass string) (Ftpuser, error) {
-// 	return check(name, pass), nil
-// 	// return constantTimeEquals(name, a.Name) && constantTimeEquals(pass, a.Password), nil
-// }
-
-func constantTimeEquals(a, b string) bool {
-	return len(a) == len(b) && subtle.ConstantTimeCompare([]byte(a), []byte(b)) == 1
+	return nil, 0, errors.New("认证失败")
 }
