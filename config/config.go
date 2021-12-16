@@ -92,6 +92,14 @@ func Db() (*gorm.DB,error) {
 	return db, nil
 }
 
+//用户认证表
+type Ftp_user struct {
+	Id  string
+	Rpassword string
+	Wpassword string
+	Datapath  string
+}
+
 func Download_rate() int {
 	cfg, err := ini.Load("conf/setting.ini")
 	if err != nil {
