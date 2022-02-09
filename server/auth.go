@@ -16,9 +16,9 @@ type Auth interface {
 	CheckPasswd(string, string) (int, error)
 }
 
-var usertable config.Ftp_user
+var usertable config.Ftptable
 
-func CheckPasswd(name string, pwd string) (*config.Ftp_user, int, error) {
+func CheckPasswd(name string, pwd string) (*config.Ftptable, int, error) {
     var dbsort = config.Dbsort
 
 	switch {
@@ -30,7 +30,7 @@ func CheckPasswd(name string, pwd string) (*config.Ftp_user, int, error) {
 
 }
 
-func check_sql(user string, pwd string) (*config.Ftp_user, int, error) {
+func check_sql(user string, pwd string) (*config.Ftptable, int, error) {
     dbs, err := config.Db()
     if err != nil {
     	return nil, 0, err
@@ -40,10 +40,10 @@ func check_sql(user string, pwd string) (*config.Ftp_user, int, error) {
     if errdb.Error != nil {
 		return nil, 0, errdb.Error
     }
-    if usertable.Rpassword == pwd {
+    if usertable.Rpasswd == pwd {
     	return &usertable, 0, nil
 	}
-	if usertable.Wpassword == pwd {
+	if usertable.Wpasswd == pwd {
 		return &usertable, 1, nil
 	}
 
@@ -51,7 +51,7 @@ func check_sql(user string, pwd string) (*config.Ftp_user, int, error) {
 }
 
 //mongo auth
-func check_mongo(user string, pwd string) (*config.Ftp_user, int, error) {
+func check_mongo(user string, pwd string) (*config.Ftptable, int, error) {
 	mongoclient, err := config.Db_mongo()
 	if err != nil {
 		return nil, 0, err
@@ -65,10 +65,10 @@ func check_mongo(user string, pwd string) (*config.Ftp_user, int, error) {
 		return nil, 0, err
 	}
 
-	if usertable.Rpassword == pwd {
+	if usertable.Rpasswd == pwd {
 		return &usertable, 0, nil
 	}
-	if usertable.Wpassword == pwd {
+	if usertable.Wpasswd == pwd {
 		return &usertable, 1, nil
 	}
 

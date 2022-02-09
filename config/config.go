@@ -93,10 +93,10 @@ func Db() (*gorm.DB,error) {
 }
 
 //用户认证表
-type Ftp_user struct {
+type Ftptable struct {
 	Id  string
-	Rpassword string
-	Wpassword string
+	Rpasswd string
+	Wpasswd string
 	Datapath  string
 }
 

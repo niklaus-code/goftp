@@ -114,6 +114,14 @@ func newSessionID() string {
 // goroutine, so use this channel to be notified when the connection can be
 // cleaned up.
 func (conn *Conn) Serve() {
+	defer func() {
+		if err := recover(); err != nil {
+			fmt.Println("捕获异常:", err)
+		}
+		fmt.Println("b")
+	}()
+
+	panic(123123)
 	conn.logger.Print(conn.sessionID, "Connection Established")
 	// send welcome
 	conn.writeMessage(220, conn.server.WelcomeMessage)
