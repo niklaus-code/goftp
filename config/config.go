@@ -15,33 +15,25 @@ import (
 	"gorm.io/gorm"
 )
 
+//ftpuser table
+//tag is important , don't change or delete
+type Ftptable struct {
+	Uuser  string `json:"user"`
+	Rprasswd string `json:"rpasswd"`
+	Wwpasswd string `json:"wpasswd"`
+	Ddatapath  string `json:"datapath"`
+}
+
 var cfg, _ = ini.Load("conf/setting.ini")
+var Dbsort = "mysql"
 
 var StartPort = cfg.Section("pasvport").Key("startport").String()
 var RangePort = cfg.Section("pasvport").Key("rangeport").String()
-var Dbsort = cfg.Section("db").Key("dbname").String()
 
-func export(Dbsort string) map[string]string {
-	var user = cfg.Section(Dbsort).Key("user").String()
-	var passwd = cfg.Section(Dbsort).Key("passwd").String()
-	var ip = cfg.Section(Dbsort).Key("ip").String()
-	var port = cfg.Section(Dbsort).Key("port").String()
-	var database = cfg.Section(Dbsort).Key("database").String()
-
-	config := make(map[string]string)
-	config["user"] = user
-	config["passwd"] = passwd
-	config["ip"] = ip
-	config["port"] = port
-	config["database"] = database
-	return config
-}
 
 func Db_mongo() (*mongo.Client, error) {
-	var config = export("mongodb")
-
 	// Set client options
-	mongodb_url := fmt.Sprintf("mongodb://%s:%s@%s:%s/%s", config["user"], config["passwd"], config["ip"], config["port"], config["database"])
+	mongodb_url := fmt.Sprintf("mongodb://%s:%s@%s:%s/%s", "user", "passwd", "127.0.0.1", "27017", "goftp")
 	clientOptions := options.Client().ApplyURI(mongodb_url)
 
 	// Connect to MongoDB
@@ -61,14 +53,11 @@ func Db_mongo() (*mongo.Client, error) {
 }
 
 func Db() (*gorm.DB,error) {
-	dbsort := Dbsort
-	dbinfo := export(dbsort)
-
 	var db *gorm.DB
 	var err error
 
-	if dbsort == "mysql" {
-		dsn := fmt.Sprintf("%s:%s@(%s:%s)/%s?charset=utf8mb4&parseTime=true&loc=Local", dbinfo["user"], dbinfo["passwd"], dbinfo["ip"], dbinfo["port"], dbinfo["database"])
+	if Dbsort == "mysql" {
+		dsn := fmt.Sprintf("%s:%s@(%s:%s)/%s?charset=utf8mb4&parseTime=true&loc=Local","nicloud", "nicloud", "127.0.0.1", "3306", "goftp")
 		db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
 			NamingStrategy: schema.NamingStrategy{
 				SingularTable: true,
@@ -78,7 +67,7 @@ func Db() (*gorm.DB,error) {
 			return nil, err
 		}
 	} else {
-		dsn := fmt.Sprintf("host=%s user=postgres password='' database=gscloud_web port=5432 sslmode=disable TimeZone=Asia/Shanghai", dbinfo["ip"])
+		dsn := fmt.Sprintf("host=%s user=postgres password='' database=gscloud_web port=5432 sslmode=disable TimeZone=Asia/Shanghai","127.0.0.1")
 		db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{
 			NamingStrategy: schema.NamingStrategy{
 				SingularTable: true,
@@ -90,14 +79,6 @@ func Db() (*gorm.DB,error) {
 	}
 
 	return db, nil
-}
-
-//用户认证表
-type Ftptable struct {
-	Id  string
-	Rpasswd string
-	Wpasswd string
-	Datapath  string
 }
 
 func Download_rate() int {

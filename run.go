@@ -8,25 +8,22 @@ package main
 
 import (
 	"flag"
-	"log"
 	filedriver "github.com/niklaus-code/goftp/file-driver"
 	"github.com/niklaus-code/goftp/server"
+	"log"
 )
+
 
 
 func main() {
 	var (
-		root = flag.String("root", "/tmp", "Root directory to serve")
 		port = flag.Int("port", 21, "Port")
 		host = flag.String("host", "0.0.0.0", "Host")
 	)
+
 	flag.Parse()
-	if *root == "" {
-		log.Fatalf("Please set a root to serve with -root")
-	}
 
 	factory := &filedriver.FileDriverFactory{
-		RootPath: *root,
 		Perm:     server.NewSimplePerm("user", "group"),
 	}
 
@@ -34,7 +31,6 @@ func main() {
 		Factory:  factory,
 		Port:     *port,
 		Hostname: *host,
-		RootPath: *root,
 	}
 
 	log.Printf("请使用root用户启动项目")

@@ -427,7 +427,6 @@ func (cmd commandList) Execute(conn *Conn, param string) {
 	info, err := conn.driver.Stat(currentpath)
 
 	if err != nil {
-		fmt.Println(err)
 		conn.writeMessage(550, err.Error())
 		return
 	}
@@ -530,7 +529,9 @@ func (cmd commandMdtm) RequireAuth() bool {
 
 func (cmd commandMdtm) Execute(conn *Conn, param string) {
 	path := conn.buildPath(param)
-	stat, err := conn.driver.Stat(path)
+	currentpath := conn.rootpath + path
+
+	stat, err := conn.driver.Stat(currentpath)
 
 	if err == nil {
 		conn.writeMessage(213, stat.ModTime().Format("20060102150405"))
@@ -642,14 +643,14 @@ var Privileges int
 
 func (cmd commandPass) Execute(conn *Conn, param string) {
 	// ok, err := conn.server.Auth.CheckPasswd(conn.reqUser, param)
-	u, privilileges, err := CheckPasswd(conn.reqUser, param)
+	datapath, privilileges, err := CheckPasswd(conn.reqUser, param)
 	if err != nil {
 		conn.writeMessage(200, "auth faild")
 		return
 	}
 	conn.pwd = param
 	conn.user = conn.reqUser
-	conn.rootpath = u.Datapath
+	conn.rootpath = datapath
 
 	switch {
 	case privilileges == 0:

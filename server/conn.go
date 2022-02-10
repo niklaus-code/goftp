@@ -118,10 +118,8 @@ func (conn *Conn) Serve() {
 		if err := recover(); err != nil {
 			fmt.Println("捕获异常:", err)
 		}
-		fmt.Println("b")
 	}()
 
-	panic(123123)
 	conn.logger.Print(conn.sessionID, "Connection Established")
 	// send welcome
 	conn.writeMessage(220, conn.server.WelcomeMessage)
