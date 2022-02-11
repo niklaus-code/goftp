@@ -8,56 +8,62 @@ import (
 	"github.com/go-ini/ini"
 	"gorm.io/driver/mysql"
 
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
-
-	"context"
 	"gorm.io/gorm"
 )
 
 //ftpuser table
-//tag is important , don't change or delete
-type Ftptable struct {
-	Uuser  string `json:"user"`
-	Rprasswd string `json:"rpasswd"`
-	Wwpasswd string `json:"wpasswd"`
-	Ddatapath  string `json:"datapath"`
+//field can be change for match databse,but tag con't change or delete , tag is important
+type Ftpuser struct {
+	User  string `json:"user"`
+	Rpasswd string `json:"rpasswd"`
+	Wpasswd string `json:"wpasswd"`
+	Datapath  string `json:"datapath"`
+}
+
+func Fuobj ()  *Ftpuser {
+	fu := Ftpuser{}
+	return &fu
 }
 
 var cfg, _ = ini.Load("conf/setting.ini")
-var Dbsort = "mysql"
+var Dbsort = cfg.Section("dbsort").Key("db").String()
 
 var StartPort = cfg.Section("pasvport").Key("startport").String()
 var RangePort = cfg.Section("pasvport").Key("rangeport").String()
+var dbname = cfg.Section("database").Key("dbname").String()
+var host = cfg.Section("database").Key("dbhost").String()
+var port = cfg.Section("database").Key("port").String()
+var user = cfg.Section("database").Key("user").String()
+var passwd = cfg.Section("database").Key("passwd").String()
 
 
-func Db_mongo() (*mongo.Client, error) {
-	// Set client options
-	mongodb_url := fmt.Sprintf("mongodb://%s:%s@%s:%s/%s", "user", "passwd", "127.0.0.1", "27017", "goftp")
-	clientOptions := options.Client().ApplyURI(mongodb_url)
-
-	// Connect to MongoDB
-	client, err := mongo.Connect(context.TODO(), clientOptions)
-
-	if err != nil {
-		return nil, err
-	}
-
-	// Check the connection
-	err = client.Ping(context.TODO(), nil)
-
-	if err != nil {
-		return nil, err
-	}
-	return client, nil
-}
+//func Db_mongo() (*mongo.Client, error) {
+//	// Set client options
+//	mongodb_url := fmt.Sprintf("mongodb://%s:%s@%s:%s/%s", "user", "passwd", "127.0.0.1", "27017", "goftp")
+//	clientOptions := options.Client().ApplyURI(mongodb_url)
+//
+//	// Connect to MongoDB
+//	client, err := mongo.Connect(context.TODO(), clientOptions)
+//
+//	if err != nil {
+//		return nil, err
+//	}
+//
+//	// Check the connection
+//	err = client.Ping(context.TODO(), nil)
+//
+//	if err != nil {
+//		return nil, err
+//	}
+//	return client, nil
+//}
 
 func Db() (*gorm.DB,error) {
 	var db *gorm.DB
 	var err error
 
 	if Dbsort == "mysql" {
-		dsn := fmt.Sprintf("%s:%s@(%s:%s)/%s?charset=utf8mb4&parseTime=true&loc=Local","nicloud", "nicloud", "127.0.0.1", "3306", "goftp")
+		dsn := fmt.Sprintf("%s:%s@(%s:%s)/%s?charset=utf8mb4&parseTime=true&loc=Local",user, passwd, host, port, dbname)
 		db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
 			NamingStrategy: schema.NamingStrategy{
 				SingularTable: true,

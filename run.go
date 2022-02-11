@@ -8,8 +8,8 @@ package main
 
 import (
 	"flag"
-	filedriver "github.com/niklaus-code/goftp/file-driver"
-	"github.com/niklaus-code/goftp/server"
+	filedriver "goftp/file-driver"
+	"goftp/server"
 	"log"
 )
 
@@ -35,7 +35,7 @@ func main() {
 
 	log.Printf("请使用root用户启动项目")
 	log.Printf("Starting ftp server on %v:%v", opts.Hostname, opts.Port)
-	//log.Printf("Username %v, Password %v", *user, *pass)
+
 	server := server.NewServer(opts)
 	err := server.ListenAndServe()
 	if err != nil {

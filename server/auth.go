@@ -8,7 +8,7 @@ import (
 	//"context"
 	"errors"
 	"fmt"
-	"github.com/niklaus-code/goftp/config"
+	"goftp/config"
 	//"go.mongodb.org/mongo-driver/bson"
 	"reflect"
 )
@@ -17,8 +17,6 @@ import (
 type Auth interface {
 	CheckPasswd(string, string) (int, error)
 }
-
-
 
 func CheckPasswd(name string, pwd string) (string,  int, error) {
     var dbsort = config.Dbsort
@@ -33,7 +31,7 @@ func CheckPasswd(name string, pwd string) (string,  int, error) {
 }
 
 func mapuser() (map[string]string, error) {
-	var usertable config.Ftptable
+	usertable := config.Fuobj()
 
 	var usermap = make(map[string]string)
 	val := reflect.Indirect(reflect.ValueOf(usertable))
@@ -46,20 +44,20 @@ func mapuser() (map[string]string, error) {
 }
 
 func check_sql(user string, pwd string) (string, int, error) {
-	u, _ := mapuser()
+	mapu, _ := mapuser()
     dbs, err := config.Db()
     if err != nil {
     	return "", 0, err
 	}
 
-	sql := fmt.Sprintf("%s='%s'", u["user"], user)
+	sql := fmt.Sprintf("%s='%s'", mapu["user"], user)
 
-	d := config.Ftptable{}
-    errdb := dbs.Where(sql).First(&d)
+	u := config.Fuobj()
+    errdb := dbs.Where(sql).First(&u)
     if errdb.Error != nil {
 		return "", 0, errdb.Error
     }
-	val := reflect.Indirect(reflect.ValueOf(d))
+	val := reflect.Indirect(reflect.ValueOf(u))
 
     mu, _ := mapuser()
 
