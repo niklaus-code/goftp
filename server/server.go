@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"net"
 	"strconv"
+	"time"
 )
 
 // Version returns the library version
@@ -63,6 +64,10 @@ type ServerOpts struct {
 
 	// A logger implementation, if nil the StdLogger is used
 	Logger Logger
+
+	Logpath  string
+
+	Debug bool
 }
 
 // Server is the root of your FTP application. You should instantiate one
@@ -88,7 +93,7 @@ var ErrServerClosed = errors.New("ftp: Server closed")
 // then adds any default values that are missing and returns the new data.
 func serverOptsWithDefaults(opts *ServerOpts) *ServerOpts {
 	var newOpts ServerOpts
-	newOpts.RootPath = opts.RootPath
+	//newOpts.RootPath = opts.RootPath
 	if opts == nil {
 		opts = &ServerOpts{}
 	}
@@ -118,10 +123,19 @@ func serverOptsWithDefaults(opts *ServerOpts) *ServerOpts {
 	// if opts.Auth != nil {
 	// 	newOpts.Auth = opts.Auth
 	// }
-
-	newOpts.Logger = &StdLogger{}
-	if opts.Logger != nil {
-		newOpts.Logger = opts.Logger
+	if opts.Debug {
+		newOpts.Logger = &StdLogger{}
+		if opts.Logger != nil {
+			newOpts.Logger = opts.Logger
+		}
+	} else {
+		newOpts.Logger = &Loggerfile{
+			time:    time.Now().Format("2006-01-02 15:04:05"),
+			logfile: opts.Logpath,
+		}
+		if opts.Logger != nil {
+			newOpts.Logger = opts.Logger
+		}
 	}
 
 	newOpts.TLS = opts.TLS
@@ -158,6 +172,7 @@ func NewServer(opts *ServerOpts) *Server {
 	s.ServerOpts = opts
 	s.listenTo = net.JoinHostPort(opts.Hostname, strconv.Itoa(opts.Port))
 	s.logger = opts.Logger
+	s.Logpath = opts.Logpath
 	return s
 }
 
