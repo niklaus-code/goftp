@@ -20,9 +20,21 @@ type Ftpuser struct {
 	Datapath  string `json:"datapath"`
 }
 
-func Fuobj ()  *Ftpuser {
-	fu := Ftpuser{}
-	return &fu
+func Ftpuserobj ()  *Ftpuser {
+	f := Ftpuser{}
+	return &f
+}
+
+type Ftpvdiruser struct {
+	Id  int
+	User string  `json:"user"`
+	Rpasswd string `json:"rpasswd"`
+	Filepath  string `json:"filepath"`
+}
+
+func Ftpvdiruserobj ()  *Ftpvdiruser{
+	f := Ftpvdiruser{}
+	return &f
 }
 
 type Ftpvdirfile struct {

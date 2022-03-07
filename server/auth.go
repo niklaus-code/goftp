@@ -26,12 +26,12 @@ func CheckPasswd(name string, pwd string) (string,  int, error) {
 		return "", 0, nil
 		//return check_mongo(name, pwd)
 	default:
-		return check_sql(name, pwd)
+		return checkpass(name, pwd)
 	}
 }
 
 func mapuser() (map[string]string, error) {
-	usertable := config.Fuobj()
+	usertable := config.Ftpuserobj()
 
 	var usermap = make(map[string]string)
 	val := reflect.Indirect(reflect.ValueOf(usertable))
@@ -43,29 +43,36 @@ func mapuser() (map[string]string, error) {
 	return usermap, nil
 }
 
-func check_sql(user string, pwd string) (string, int, error) {
+func checkpass(user string, pwd string) (string, int, error) {
 	mapu, _ := mapuser()
     dbs, err := config.Db()
     if err != nil {
     	return "", 0, err
 	}
 
-	sql := fmt.Sprintf("%s='%s'", mapu["user"], user)
+	var u interface{}
+	if string(pwd[0]) == "c" {
+		u = config.Ftpvdiruserobj()
+	} else {
+		u = config.Ftpuserobj()
+	}
 
-	u := config.Fuobj()
+	sql := fmt.Sprintf("%s='%s'", mapu["user"], user)
+	fmt.Println(sql)
     errdb := dbs.Where(sql).First(&u)
     if errdb.Error != nil {
+    	fmt.Println(213123)
 		return "", 0, errdb.Error
     }
 	val := reflect.Indirect(reflect.ValueOf(u))
+	fmt.Println(val.FieldByName(mapu["rpasswd"]).String())
+	fmt.Println(pwd)
 
-    mu, _ := mapuser()
-
-    if val.FieldByName(mu["rpasswd"]).String() == pwd {
-    	return val.FieldByName(mu["datapath"]).String(), 0, nil
+    if val.FieldByName(mapu["rpasswd"]).String() == pwd {
+    	return val.FieldByName(mapu["datapath"]).String(), 0, nil
 	}
-	if val.FieldByName(mu["wpasswd"]).String()  == pwd {
-		return val.FieldByName(mu["datapath"]).String(), 1, nil
+	if val.FieldByName(mapu["wpasswd"]).String()  == pwd {
+		return val.FieldByName(mapu["datapath"]).String(), 1, nil
 	}
 
 	return "", 0, errors.New("认证失败")

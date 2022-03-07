@@ -116,7 +116,7 @@ func newSessionID() string {
 func (conn *Conn) Serve() {
 	defer func() {
 		if err := recover(); err != nil {
-			fmt.Println("捕获异常:", err)
+			conn.logger.Print(conn.sessionID, err)
 			conn.Close()
 		}
 	}()
