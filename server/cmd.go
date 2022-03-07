@@ -6,7 +6,9 @@ package server
 
 import (
 	"encoding/binary"
+	"errors"
 	"fmt"
+	config "goftp/config"
 	"log"
 	"strconv"
 	"strings"
@@ -421,37 +423,55 @@ type FilePath struct {
 
 func (cmd commandList) Execute(conn *Conn, param string) {
 	var files []FileInfo
+	if string(conn.pwd[0]) == "c" {
+		db, err := config.Db()
+		if err != nil {
+			conn.writeMessage(500,  errors.New("db connect error").Error())
+			return
+		}
+		var f []*config.Ftpvdirfile
+		db.Where("user=?", conn.user).Find(&f)
 
-	path := conn.buildPath(parseListParam(param))
-	currentpath := conn.rootpath + path
-	info, err := conn.driver.Stat(currentpath)
+		for i := 0; i < len(f); i++ {
+			conn.driver.ListDirs(f[i].Filepath, func(f FileInfo) error {
+				files = append(files, f)
+				return nil
+			})
+		}
+		conn.writeMessage(150, "Opening ASCII mode data connection for file list")
+		conn.sendOutofbandData(listFormatter(files).Detailed())
 
-	if err != nil {
-		conn.writeMessage(550, err.Error())
-		return
-	}
+	} else {
+		path := conn.buildPath(parseListParam(param))
+		currentpath := conn.rootpath + path
+		info, err := conn.driver.Stat(currentpath)
 
-	if info == nil {
-		conn.logger.Printf(conn.sessionID, "%s: no such file or directory.\n", currentpath)
-		return
-	}
-
-	if info.IsDir() {
-		err = conn.driver.ListDir(currentpath, func(f FileInfo) error {
-			files = append(files, f)
-			return nil
-		})
 		if err != nil {
 			conn.writeMessage(550, err.Error())
 			return
 		}
-	} else {
-		files = append(files, info)
-	}
-	conn.writeMessage(150, "Opening ASCII mode data connection for file list")
-	conn.sendOutofbandData(listFormatter(files).Detailed())
-}
 
+		if info == nil {
+			conn.logger.Printf(conn.sessionID, "%s: no such file or directory.\n", currentpath)
+			return
+		}
+
+		if info.IsDir() {
+			err = conn.driver.ListDir(currentpath, func(f FileInfo) error {
+				files = append(files, f)
+				return nil
+			})
+			if err != nil {
+				conn.writeMessage(550, err.Error())
+				return
+			}
+		} else {
+			files = append(files, info)
+		}
+		conn.writeMessage(150, "Opening ASCII mode data connection for file list")
+		conn.sendOutofbandData(listFormatter(files).Detailed())
+	}
+}
 func parseListParam(param string) (path string) {
 	if len(param) == 0 {
 		path = param

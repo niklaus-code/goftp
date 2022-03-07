@@ -25,6 +25,11 @@ func Fuobj ()  *Ftpuser {
 	return &fu
 }
 
+type Ftpvdirfile struct {
+	Id  string
+	Filepath  string
+}
+
 var cfg, _ = ini.Load("conf/setting.ini")
 var Dbsort = cfg.Section("dbsort").Key("db").String()
 
