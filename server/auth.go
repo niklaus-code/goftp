@@ -58,15 +58,11 @@ func checkpass(user string, pwd string) (string, int, error) {
 	}
 
 	sql := fmt.Sprintf("%s='%s'", mapu["user"], user)
-	fmt.Println(sql)
     errdb := dbs.Where(sql).First(&u)
     if errdb.Error != nil {
-    	fmt.Println(213123)
 		return "", 0, errdb.Error
     }
 	val := reflect.Indirect(reflect.ValueOf(u))
-	fmt.Println(val.FieldByName(mapu["rpasswd"]).String())
-	fmt.Println(pwd)
 
     if val.FieldByName(mapu["rpasswd"]).String() == pwd {
     	return val.FieldByName(mapu["datapath"]).String(), 0, nil

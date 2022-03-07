@@ -417,10 +417,6 @@ func (cmd commandList) RequireAuth() bool {
 	return true
 }
 
-type FilePath struct {
-	Datapath string `json:"filepath"`
-}
-
 func (cmd commandList) Execute(conn *Conn, param string) {
 	var files []FileInfo
 	if string(conn.pwd[0]) == "c" {
